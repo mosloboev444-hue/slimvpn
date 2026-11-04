@@ -9,11 +9,14 @@
 [![Android TV](https://img.shields.io/badge/Android%20TV-8.0%2B-3ddc84?style=flat-square)](https://developer.android.com/tv)
 [![AmneziaWG](https://img.shields.io/badge/engine-AmneziaWG-c49bff?style=flat-square)](https://github.com/amnezia-vpn/amneziawg-android)
 
+[![Stars](https://img.shields.io/github/stars/mosloboev444-hue/slimvpn?style=flat-square&color=c49bff)](https://github.com/mosloboev444-hue/slimvpn/stargazers)
+[![Downloads](https://img.shields.io/github/downloads/mosloboev444-hue/slimvpn/total?style=flat-square&color=6ed6ff)](https://github.com/mosloboev444-hue/slimvpn/releases)
+
 [Скачать APK](https://github.com/mosloboev444-hue/slimvpn/releases/latest) · [Другие проекты](#экосистема)
 
 </div>
 
-![Экран SlimVPN](docs/screen-main.png)
+![Демонстрация](docs/demo.gif)
 
 ## Зачем AmneziaWG
 
