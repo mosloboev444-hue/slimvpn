@@ -9,3 +9,5 @@ keystore.properties
 # конфиги и ключи не публикуем
 *.conf
 *.toml
+app/src/main/assets/config.conf
+app/src/main/assets/*.conf

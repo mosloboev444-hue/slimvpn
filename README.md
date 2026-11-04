@@ -41,7 +41,12 @@ AmneziaWG добавляет обфускацию (`Jc`, `Jmin`, `Jmax`, `H1`–
 |---|---|---|
 | ![](docs/screen-main.png) | ![](docs/screen-youtube.png) | ![](docs/screen-home-vpn.png) |
 
-## Установка
+'## Свой профиль «из коробки»
+
+Положите конфиг в `app/src/main/assets/config.conf` перед сборкой — приложение возьмёт его, если в `Download` нет других.
+Файл добавлен в `.gitignore`: личные ключи в репозиторий не попадают.
+
+## Установка'
 
 ```bash
 adb install -r SlimVPN-2.1.apk

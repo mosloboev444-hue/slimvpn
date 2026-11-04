@@ -24,7 +24,7 @@ public class AutoVpnService extends Service {
 
     private static final String CHANNEL = "slimvpn_watch";
     private static final int NOTIF_ID = 42;
-    private static final String[] TARGETS = {"org.smarttube.stable", "com.google.android.youtube"};
+    private static final String[] TARGETS = {"org.smarttube.stable", "com.google.android.youtube", "com.slimvpn.app"};
 
     private volatile boolean running = true;
     private Thread worker;
@@ -68,7 +68,9 @@ public class AutoVpnService extends Service {
                             }
                         }
                     } else {
-                        if (VpnController.isConnected() && VpnController.isOwnedByWatcher()) {
+                        boolean protectedNow = System.currentTimeMillis()
+                                < getSharedPreferences("slimvpn", MODE_PRIVATE).getLong("protect_until", 0L);
+                        if (!protectedNow && VpnController.isConnected() && VpnController.isOwnedByWatcher()) {
                             VpnController.disconnect(null);
                         }
                     }

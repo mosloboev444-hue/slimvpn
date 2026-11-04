@@ -20,12 +20,13 @@ import java.util.List;
 
 public class MainActivity extends Activity {
 
-    private TextView tvStatus, tvProfile, btnConnect, btnImport, btnAuto;
+    private TextView tvStatus, tvProfile, btnConnect, btnImport, btnAuto, btnYoutube;
     private final Handler ui = new Handler(Looper.getMainLooper());
 
     private Config config;
     private String profileName = "";
     private boolean connected = false;
+    private boolean autoOpened = false;
 
     private static final int VPN_REQUEST = 1001;
 
@@ -38,6 +39,7 @@ public class MainActivity extends Activity {
         btnConnect = findViewById(R.id.btnConnect);
         btnImport = findViewById(R.id.btnImport);
         btnAuto = findViewById(R.id.btnAuto);
+        btnYoutube = findViewById(R.id.btnYoutube);
 
         try { VpnController.backend(this); }
         catch (Throwable t) { tvStatus.setText("Движок AmneziaWG недоступен: " + t.getClass().getSimpleName()); }
@@ -51,12 +53,16 @@ public class MainActivity extends Activity {
         autoLoadFromDownload();
         updateUi();
         startWatcher();
-
-        autoLoadFromDownload();
-        updateUi();
+        if (btnYoutube != null) btnYoutube.requestFocus();
+        // YouTube со встроенным VPN: поднимаем туннель и сразу открываем YouTube
+        if (!autoOpened) {
+            autoOpened = true;
+            ui.postDelayed(this::openYoutubeWithVpn, 800);
+        }
 
         btnConnect.setOnClickListener(v -> toggle());
         btnImport.setOnClickListener(v -> { autoLoadFromDownload(); toast("Профиль перечитан из Download"); });
+        if (btnYoutube != null) btnYoutube.setOnClickListener(v -> openYoutubeWithVpn());
         if (btnAuto != null) {
             updateAutoButton();
             btnAuto.setOnClickListener(v -> {
@@ -86,11 +92,49 @@ public class MainActivity extends Activity {
 
     private void autoLoadFromDownload() {
         List<File> confs = confFiles();
-        if (confs.isEmpty()) {
-            tvStatus.setText("Профиль не найден: положите .conf в Download");
-            return;
+        if (!confs.isEmpty()) { loadConfig(confs.get(0)); return; }
+        // запасной вариант — встроенный профиль
+        if (loadBundledConfig()) return;
+        tvStatus.setText("Профиль не найден: положите .conf в Download");
+    }
+
+    private boolean loadBundledConfig() {
+        try (java.io.InputStream in = getAssets().open("config.conf");
+             java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(in))) {
+            config = Config.parse(r);
+            profileName = "встроенный профиль";
+            tvProfile.setText("Профиль: встроенный");
+            tvStatus.setText("Готов к подключению");
+            updateUi();
+            return true;
+        } catch (Throwable t) {
+            return false;
         }
-        loadConfig(confs.get(0));
+    }
+
+    /** Одна кнопка: поднять VPN и открыть YouTube. */
+    private void openYoutubeWithVpn() {
+        if (config == null) {
+            if (!loadBundledConfig()) { toast("Нет профиля VPN"); return; }
+        }
+        tvStatus.setText("Включаю VPN…");
+        getSharedPreferences("slimvpn", MODE_PRIVATE).edit()
+                .putLong("protect_until", System.currentTimeMillis() + 30000L).apply();
+        VpnController.setOwnedByWatcher(true);
+        VpnController.connect(this, config, (ok, err) -> ui.post(() -> {
+            if (!ok) { tvStatus.setText("VPN не поднялся: " + err); return; }
+            tvStatus.setText("VPN включён — открываю YouTube");
+            launchYoutube();
+        }));
+    }
+
+    private void launchYoutube() {
+        android.content.Intent i = getPackageManager()
+                .getLaunchIntentForPackage("com.google.android.youtube.tv");
+        if (i == null) i = getPackageManager().getLaunchIntentForPackage("org.smarttube.stable");
+        if (i == null) { toast("YouTube не установлен"); return; }
+        i.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
     }
 
     private void loadConfig(File file) {
