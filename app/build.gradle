@@ -1,0 +1,48 @@
+plugins { id 'com.android.application' }
+
+def keystorePropsFile = rootProject.file('keystore.properties')
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) { keystorePropsFile.withInputStream { keystoreProps.load(it) } }
+
+android {
+    namespace 'com.slimvpn.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.slimvpn.app'
+        minSdk 26
+        targetSdk 34
+        versionCode 3
+        versionName '2.1'
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig keystorePropsFile.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'androidx.annotation:annotation:1.7.1'
+    implementation 'androidx.collection:collection:1.4.0'
+    implementation 'androidx.core:core:1.12.0'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+}

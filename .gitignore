@@ -1,0 +1,11 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+build/
+*.jks
+*.keystore
+keystore.properties
+# конфиги и ключи не публикуем
+*.conf
+*.toml
